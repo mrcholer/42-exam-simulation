@@ -1,0 +1,23 @@
+# Poolers
+
+node_modules/
+web/node_modules/
+web/.tmp/
+web/.scratch/
+web/.exam-sessions/
+web
+scripts
+*.o
+*.a
+*.so
+*.exe
+a.out
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*~
+
+# Student work copies — keep repo clean
+**/student/

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Poolers Playground</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/app.css?v=26" />
+</head>
+<body>
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+  <div class="app" id="app-root">
+    <header class="header">
+      <button id="btn-sidebar-toggle" class="btn btn-ghost btn-sm sidebar-toggle" title="Open files" aria-label="Toggle sidebar">☰</button>
+      <div class="header-brand">
+        <div class="logo-mark">P</div>
+        <div>
+          <h1>Poolers Playground</h1>
+          <p>Code · Run · Quiz · Understand</p>
+        </div>
+      </div>
+      <div class="header-stats" id="header-stats">
+        <span class="stat"><strong id="stat-cfiles">—</strong> C files</span>
+        <span class="stat"><strong id="stat-lines">—</strong> lines</span>
+        <span class="stat"><strong id="stat-done">0</strong> done</span>
+        <span class="stat"><strong id="stat-module">—</strong></span>
+      </div>
+      <div class="header-actions">
+        <a href="/exam" class="btn btn-exam" id="btn-open-exam" title="Open 42-style Exam Shell">Exam</a>
+        <button id="btn-theme" class="btn btn-ghost btn-sm" title="Toggle light/dark theme" aria-label="Toggle theme">☀</button>
+        <button id="btn-toggle-panel" class="btn btn-ghost btn-sm" title="Toggle output panel">Panel ▾</button>
+        <button id="btn-norme" class="btn btn-ghost btn-sm" title="Run norminette on current C file">Norme</button>
+        <button id="btn-mark-done" class="btn btn-ghost btn-sm" title="Mark current file done">✓ Done</button>
+        <button id="btn-step" class="btn btn-outline" title="Simulate execution step-by-step (local tracer)"><span class="btn-icon">⏵</span> Step</button>
+        <button id="btn-run" class="btn btn-run" title="Compile and run with gcc"><span class="btn-icon">▶</span> Run</button>
+        <button id="btn-reset" class="btn btn-ghost">Reset</button>
+      </div>
+    </header>
+
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-resize" id="sidebar-resize" title="Drag to resize"></div>
+      <div class="sidebar-head">
+        <div class="sidebar-tabs scroll-x">
+          <button class="sidebar-tab active" data-view="browse">Browse</button>
+          <button class="sidebar-tab" data-view="cfiles">C Files</button>
+          <button class="sidebar-tab" data-view="quizzes">Quizzes</button>
+          <button class="sidebar-tab" data-view="scratch">Scratch</button>
+        </div>
+        <input type="search" id="search" class="search-input" placeholder="Search…" />
+        <div class="filter-chips" id="filter-chips"></div>
+      </div>
+      <div class="sidebar-view active" id="view-browse">
+        <nav id="curriculum-tree" class="tree scroll-area"></nav>
+      </div>
+      <div class="sidebar-view" id="view-cfiles">
+        <div id="cfiles-list" class="cfiles-list scroll-area"></div>
+      </div>
+      <div class="sidebar-view" id="view-quizzes">
+        <div id="quizzes-list" class="quizzes-list scroll-area"></div>
+      </div>
+      <div class="sidebar-view" id="view-scratch">
+        <div class="scratch-actions">
+          <button id="btn-new-scratch" class="btn btn-run btn-sm">+ New C scratch</button>
+        </div>
+        <div id="scratch-list" class="scratch-list scroll-area"></div>
+        <div class="scratch-history-wrap" id="scratch-history-wrap">
+          <div class="col-head col-head-sub"><h3>Save History</h3></div>
+          <div id="scratch-history" class="scratch-history scroll-area"></div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <!-- VS Code-style open file tabs -->
+      <div class="editor-tab-bar-wrap">
+        <div class="editor-tab-bar scroll-x" id="editor-tab-bar"></div>
+      </div>
+
+      <div class="editor-toolbar">
+        <div class="companion-btns hidden" id="companion-btns">
+          <button class="companion-btn" id="btn-open-lesson" title="Open LESSON.md">📖 Lesson</button>
+          <button class="companion-btn" id="btn-open-quiz" title="Open QUIZ.md">✓ Quiz</button>
+          <button class="companion-btn" id="btn-open-cheatsheet" title="Open CHEATSHEET.md">⚡ Cheat</button>
+        </div>
+        <div class="md-mode-btns hidden" id="md-mode-btns">
+          <button class="mode-btn active" data-mdmode="edit" title="Edit markdown">Edit</button>
+          <button class="mode-btn" data-mdmode="preview" title="Preview rendered">Preview</button>
+          <button class="mode-btn" data-mdmode="split" title="Edit + Preview">Split</button>
+          <button class="mode-btn mode-btn-quiz hidden" id="btn-quiz-mode" data-mdmode="quiz" title="Interactive quiz">Quiz</button>
+        </div>
+        <button class="companion-btn scratch-save-btn hidden" id="btn-save-scratch" title="Save version (Ctrl+S)">💾 Save</button>
+        <button class="companion-btn scratch-save-btn hidden" id="btn-rename-scratch" title="Rename scratch file">Rename</button>
+        <button class="companion-btn scratch-save-btn hidden" id="btn-export-scratch" title="Export scratch JSON">Export</button>
+        <div class="file-meta scroll-x" id="file-meta"></div>
+        <div class="file-badges">
+          <span class="badge badge-lang" id="lang-badge">C</span>
+          <span class="badge badge-lines" id="line-badge">— lines</span>
+        </div>
+      </div>
+
+      <div class="editor-workspace" id="editor-workspace">
+        <div class="editor-pane" id="editor-pane">
+          <div class="pane-header">
+            <span class="pane-title">Editor</span>
+            <span class="pane-hint" id="editor-pane-hint">Monaco · C / Markdown</span>
+          </div>
+          <div class="editor-shell">
+            <div id="editor" class="editor"></div>
+          </div>
+        </div>
+        <div class="workspace-split-resize" id="workspace-split-resize" title="Drag to resize panes"></div>
+        <div class="preview-pane pane-collapsed" id="preview-pane">
+          <div class="pane-header">
+            <span class="pane-title" id="preview-pane-title">Preview</span>
+          </div>
+          <div class="preview-body">
+            <div id="md-preview" class="md-preview markdown-body prose scroll-area"></div>
+            <div id="quiz-preview" class="quiz-preview hidden scroll-area"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <div class="bottom-resize" id="bottom-resize" title="Drag to resize output panel"></div>
+
+    <section class="bottom" id="bottom-panel">
+      <div class="bottom-mobile-tabs" id="bottom-mobile-tabs" role="tablist" aria-label="Output panels">
+        <button type="button" class="bottom-tab active" data-btab="steps" role="tab" aria-selected="true">Steps</button>
+        <button type="button" class="bottom-tab" data-btab="memory" role="tab" aria-selected="false">Memory</button>
+        <button type="button" class="bottom-tab" data-btab="terminal" role="tab" aria-selected="false">Terminal</button>
+      </div>
+      <div class="bottom-col steps-col" data-btab-panel="steps">
+        <div class="col-head col-head-steps">
+          <h3>Execution Steps <span class="mode-hint" id="steps-mode-hint" title="Step = local simulation · Run = real gcc">· sim</span></h3>
+          <div class="step-head-actions">
+            <span id="step-counter" class="pill"></span>
+            <button id="btn-close-steps" class="btn btn-ghost btn-sm step-close-btn" title="Close step mode">✕</button>
+          </div>
+        </div>
+        <div id="steps-panel" class="steps-panel scroll-area flex-fill">
+          <p class="empty-state">Press <kbd>Step</kbd> to simulate from <code>int main</code>, or <kbd>Run</kbd> (Ctrl+Enter) to compile with gcc.</p>
+        </div>
+        <div class="step-nav">
+          <button id="btn-prev" class="btn btn-ghost btn-sm" disabled>← Prev</button>
+          <button id="btn-auto" class="btn btn-outline btn-sm" title="Auto-play steps">▶ Auto</button>
+          <button id="btn-next" class="btn btn-outline btn-sm" disabled>Next →</button>
+        </div>
+      </div>
+      <div class="bottom-col memory-col" data-btab-panel="memory">
+        <div class="col-head"><h3>Memory State</h3></div>
+        <pre id="memory-panel" class="memory-pre scroll-area flex-fill">Stack appears here in Step mode.</pre>
+      </div>
+      <div class="bottom-col output-col" data-btab-panel="terminal">
+        <div class="col-head">
+          <h3>Terminal</h3>
+          <span id="exit-badge" class="pill pill-hidden"></span>
+        </div>
+        <pre id="terminal" class="terminal scroll-area flex-fill"></pre>
+        <div class="col-head col-head-sub"><h3>Output Explained</h3></div>
+        <ul id="explanation" class="explanation-list scroll-area flex-fill"></ul>
+      </div>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked@15.0.6/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/loader.js"></script>
+  <script src="js/atom-one-dark.js?v=2"></script>
+  <script src="js/progress.js?v=20"></script>
+  <script src="js/tracer.js?v=20"></script>
+  <script src="js/quiz.js?v=20"></script>
+  <script src="js/app.js?v=22"></script>
+</body>
+</html>

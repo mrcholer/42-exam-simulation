@@ -5,7 +5,6 @@ web/node_modules/
 web/.tmp/
 web/.scratch/
 web/.exam-sessions/
-web
 scripts
 *.o
 *.a

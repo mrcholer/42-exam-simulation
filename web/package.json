@@ -1,0 +1,16 @@
+{
+  "name": "poolers-playground",
+  "version": "1.0.0",
+  "description": "Interactive C code playground for Poolers curriculum",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "check": "node check.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "marked": "^15.0.6",
+    "uuid": "^11.0.5"
+  }
+}

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Poolers Exam Shell</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="css/exam.css?v=9" />
+</head>
+
+<body>
+  <div class="shell" id="shell">
+    <header class="shell-bar">
+      <div class="shell-brand">
+        <span class="shell-logo">42</span>
+        <div class="shell-brand-text">
+          <strong>Poolers Exam Shell</strong>
+          <span class="status-chip idle" id="shell-status">idle</span>
+        </div>
+      </div>
+      <div class="shell-bar-actions">
+        <span class="timer-chip hidden" id="timer-chip" title="Remaining time">--:--:--</span>
+        <a class="shell-link" href="/">← Playground</a>
+        <button type="button" class="shell-btn hidden" id="btn-leave" title="Abandon exam">leave</button>
+        <button type="button" class="shell-btn" id="btn-focus-term" title="Focus terminal">Terminal</button>
+        <button type="button" class="shell-btn primary hidden" id="btn-grade"
+          title="Grade current exercise (Ctrl+Enter)">grade</button>
+      </div>
+    </header>
+
+    <main class="shell-main" id="shell-main">
+      <section class="workspace hidden" id="workspace">
+        <div class="pane code-pane">
+          <div class="pane-top">
+            <div class="pane-top-left">
+              <span class="pane-label">rendu</span>
+              <span id="code-filename" class="pane-file">—.c</span>
+            </div>
+            <span class="pill" id="level-pill">L0</span>
+          </div>
+          <div class="exam-editor-wrap" id="exam-editor-wrap">
+            <div id="exam-editor" class="exam-editor"></div>
+            <div class="drop-overlay hidden" id="drop-overlay">Drop not allowed — type your code</div>
+          </div>
+        </div>
+        <div class="split-handle" id="split-handle" title="Drag to resize"></div>
+        <div class="pane subject-pane">
+          <div class="pane-top">
+            <div class="pane-top-left">
+              <span class="pane-label">subject</span>
+            </div>
+            <span class="pill soft" id="day-pill">day</span>
+          </div>
+          <div id="subject-view" class="subject-view markdown-body"></div>
+        </div>
+      </section>
+
+      <div class="term-resize hidden" id="term-resize" title="Drag to resize terminal"></div>
+
+      <section class="term-wrap" id="term-wrap">
+        <div class="term-tabbar" id="term-tabbar">
+          <div class="term-tabs" id="term-tabs" role="tablist" aria-label="Terminals"></div>
+          <div class="term-tab-actions">
+            <button type="button" class="term-icon-btn" id="btn-term-new" title="New Terminal">+</button>
+            <button type="button" class="term-icon-btn" id="btn-term-split" title="Split Terminal">▭</button>
+            <button type="button" class="term-icon-btn" id="btn-term-kill" title="Kill Terminal">×</button>
+          </div>
+        </div>
+        <div class="term-panels" id="term-panels"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked@15.0.6/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/loader.js"></script>
+  <script src="js/atom-one-dark.js?v=2"></script>
+  <script src="js/exam.js?v=23"></script>
+  <script src="js/examshell.js?v=16"></script>
+</body>
+
+</html>

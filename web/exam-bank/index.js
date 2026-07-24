@@ -1406,6 +1406,10 @@ int main(void)
   }),
 };
 
+/* Merge ~80+ extra subjects (display, strings, bits, malloc, exam classics). */
+const { EXTRA_BANK, EXTRA_HARDNESS } = require("./bank-extra");
+Object.assign(BANK, EXTRA_BANK);
+
 // Apply polished piscine-style subjects (C-day origin + layout).
 require("./subjects-meta").applySubjects(BANK);
 
@@ -1465,6 +1469,7 @@ const HARDNESS = {
   ft_sqrt: 5,
   ft_is_prime: 5,
   ft_find_next_prime: 6,
+  ...EXTRA_HARDNESS,
 };
 
 function hardnessOf(id) {
@@ -1485,86 +1490,144 @@ function preferHarderPool(pool, level, diff) {
 
 /** Large themed pools — each level draws 2 random exercises from its pool. */
 const POOLS = {
-  /* Exam 00 only — C00-style (write / display). No atoi, no string lib, no recursion. */
+  /* Exam 00 — C00-style display / write */
   e00_hello: [
     "ft_putchar", "ft_print_alphabet", "ft_print_numbers", "ft_print_reverse_alphabet",
     "ft_putstr", "ft_is_negative",
+    "ft_countdown", "ft_aff_a", "ft_aff_z", "ft_hello", "ft_print_digits_nl",
+    "ft_print_alphabet_nl", "ft_putchar_nl",
   ],
   e00_display: [
     "ft_putchar", "ft_putstr", "ft_print_alphabet", "ft_print_numbers",
     "ft_print_reverse_alphabet", "ft_is_negative", "ft_print_comb",
+    "ft_countdown", "ft_maff_alpha", "ft_maff_revalpha", "ft_hello",
+    "ft_print_digits_nl", "ft_print_alphabet_nl", "ft_aff_a", "ft_aff_z",
   ],
   e00_comb: [
-    "ft_print_comb", "ft_putstr", "ft_is_negative", "ft_print_alphabet",
-    "ft_print_numbers", "ft_print_reverse_alphabet", "ft_putchar",
+    "ft_print_comb", "ft_print_comb2", "ft_putstr", "ft_is_negative",
+    "ft_print_alphabet", "ft_print_numbers", "ft_print_reverse_alphabet", "ft_putchar",
+    "ft_maff_alpha", "ft_maff_revalpha", "ft_countdown",
   ],
   e00_mini_ptr: [
     "ft_ft", "ft_swap", "ft_strlen", "ft_putstr", "ft_putchar", "ft_is_negative",
+    "ft_abs", "ft_sign", "ft_even", "ft_odd", "ft_ultimate_ft",
   ],
   e00_hard_cap: [
-    "ft_print_comb", "ft_strlen", "ft_swap", "ft_ft", "ft_putstr", "ft_is_negative",
-    "ft_print_reverse_alphabet", "ft_print_numbers",
+    "ft_print_comb", "ft_print_comb2", "ft_strlen", "ft_swap", "ft_ft", "ft_putstr",
+    "ft_is_negative", "ft_print_reverse_alphabet", "ft_print_numbers",
+    "ft_maff_alpha", "ft_maff_revalpha", "ft_ultimate_ft", "ft_rev_int_tab",
   ],
 
   print_basics: [
     "ft_putchar", "ft_print_alphabet", "ft_print_numbers", "ft_print_reverse_alphabet",
     "ft_putstr", "ft_is_negative",
+    "ft_countdown", "ft_hello", "ft_aff_a", "ft_aff_z", "ft_print_digits_nl",
+    "ft_print_alphabet_nl", "ft_putchar_nl", "ft_maff_alpha",
   ],
   print_combos: [
-    "ft_print_comb", "ft_putchar", "ft_putstr", "ft_is_negative",
+    "ft_print_comb", "ft_print_comb2", "ft_putchar", "ft_putstr", "ft_is_negative",
     "ft_print_alphabet", "ft_print_numbers", "ft_print_reverse_alphabet",
+    "ft_maff_revalpha", "ft_fizzbuzz_line", "ft_tab_mult",
   ],
   pointers_intro: [
     "ft_ft", "ft_swap", "ft_div_mod", "ft_ultimate_div_mod", "ft_strlen", "ft_putstr",
+    "ft_ultimate_ft", "ft_rev_int_tab", "ft_sort_int_tab", "ft_abs", "ft_sign",
+    "ft_even", "ft_odd", "ft_clamp", "ft_max", "ft_min",
+  ],
+  ctype_basics: [
+    "ft_isalpha", "ft_isdigit", "ft_isalnum", "ft_isascii", "ft_isprint",
+    "ft_toupper", "ft_tolower", "ft_str_is_alpha", "ft_str_is_numeric",
+    "ft_str_is_lowercase", "ft_str_is_uppercase", "ft_str_is_printable",
   ],
   strings_copy: [
     "ft_strcpy", "ft_strncpy", "ft_strcat", "ft_strcmp", "ft_strlen", "ft_putstr",
+    "ft_strncmp", "ft_strncat", "ft_strlcpy_simple", "ft_strstr", "ft_strchr", "ft_strrchr",
   ],
   strings_check: [
     "ft_str_is_alpha", "ft_str_is_numeric", "ft_str_is_lowercase", "ft_str_is_printable",
-    "ft_strcmp", "ft_strlen",
+    "ft_str_is_uppercase", "ft_strcmp", "ft_strlen", "ft_strncmp",
+    "ft_isalpha", "ft_isdigit", "ft_isalnum", "ft_str_is_palindrome",
   ],
   strings_case: [
-    "ft_strupcase", "ft_strlowcase", "ft_strcapitalize", "ft_strcat", "ft_strcpy", "ft_str_is_alpha",
+    "ft_strupcase", "ft_strlowcase", "ft_strcapitalize", "ft_strcat", "ft_strcpy",
+    "ft_str_is_alpha", "ft_toupper", "ft_tolower", "rot_13", "rotone", "ulstr",
+    "alpha_mirror", "ft_snake_to_camel", "ft_camel_to_snake",
+  ],
+  strings_exam: [
+    "ft_strrev", "ft_strstr", "ft_strchr", "ft_strrchr", "ft_search_and_replace",
+    "ft_strcmp_ignore_case", "ft_count_words", "ft_is_anagram", "ft_wdmatch",
+    "ft_hidenp", "ft_inter", "ft_union", "ft_first_word", "ft_last_word",
+    "ft_epur_str", "ft_repeat_alpha", "ft_putstr_non_printable",
   ],
   /* Exam 01 may introduce putnbr late; atoi stays exam02+. */
   e01_putnbr: [
     "ft_putnbr", "ft_strlen", "ft_strcpy", "ft_strcmp", "ft_is_negative", "ft_swap",
+    "ft_print_hex", "ft_abs", "ft_max", "ft_min", "ft_sum_tab", "ft_average",
   ],
   atoi_putnbr: [
     "ft_atoi", "ft_putnbr", "ft_strlen", "ft_strcpy", "ft_strcmp", "ft_is_negative",
+    "ft_atoi_simple", "ft_itoa", "ft_print_hex", "ft_print_bits",
   ],
   recursion_easy: [
     "ft_iterative_factorial", "ft_recursive_factorial", "ft_iterative_power",
     "ft_recursive_power", "ft_fibonacci", "ft_putnbr",
+    "ft_is_power_of_2", "ft_gcd", "ft_lcm",
   ],
   math_mid: [
     "ft_sqrt", "ft_fibonacci", "ft_iterative_power", "ft_recursive_power",
     "ft_iterative_factorial", "ft_putnbr",
+    "ft_gcd", "ft_lcm", "ft_is_power_of_2", "ft_max", "ft_min", "ft_sum_tab",
   ],
   primes_hard: [
     "ft_is_prime", "ft_find_next_prime", "ft_sqrt", "ft_fibonacci",
     "ft_atoi", "ft_putnbr", "ft_print_comb",
+    "ft_gcd", "ft_lcm", "ft_ten_queens_count", "ft_print_comb2",
+  ],
+  bits_exam: [
+    "ft_print_bits", "ft_reverse_bits", "ft_swap_bits", "ft_print_hex",
+    "ft_is_power_of_2", "ft_putnbr", "ft_atoi_simple",
+  ],
+  malloc_exam: [
+    "ft_strdup", "ft_strndup", "ft_range", "ft_rrange", "ft_itoa", "ft_strjoin",
+    "ft_map", "ft_foreach", "ft_any", "ft_count_if",
+  ],
+  mem_libft: [
+    "ft_memcmp", "ft_memcpy", "ft_memset", "ft_bzero", "ft_memchr",
+    "ft_strlcpy_simple", "ft_strlen", "ft_strcpy",
   ],
   final_mix_easy: [
     "ft_putchar", "ft_strlen", "ft_swap", "ft_ft", "ft_putstr", "ft_print_alphabet",
     "ft_strcpy", "ft_strcmp",
+    "ft_countdown", "ft_hello", "ft_abs", "ft_isalpha", "ft_toupper", "ft_isdigit",
+    "ft_strchr", "ft_strrev", "ft_max", "ft_min",
   ],
   final_mix_hard: [
     "ft_print_comb", "ft_putnbr", "ft_atoi", "ft_strcapitalize", "ft_find_next_prime",
     "ft_recursive_power", "ft_is_prime", "ft_strncpy", "ft_sqrt",
+    "ft_print_comb2", "ft_itoa", "ft_strjoin", "ft_range", "rot_13", "ft_inter",
+    "ft_union", "ft_wdmatch", "ft_hidenp", "ft_epur_str", "ft_ten_queens_count",
   ],
   extreme_e00: [
-    "ft_print_comb", "ft_strlen", "ft_swap", "ft_ft", "ft_putstr",
+    "ft_print_comb", "ft_print_comb2", "ft_strlen", "ft_swap", "ft_ft", "ft_putstr",
     "ft_is_negative", "ft_print_reverse_alphabet", "ft_print_numbers", "ft_putchar",
+    "ft_maff_alpha", "ft_maff_revalpha", "ft_ultimate_ft", "ft_sort_int_tab",
   ],
   extreme_strings: [
     "ft_strcapitalize", "ft_strncpy", "ft_strcmp", "ft_strcat", "ft_str_is_printable",
     "ft_strupcase", "ft_putnbr",
+    "ft_snake_to_camel", "ft_camel_to_snake", "ft_is_anagram", "ft_search_and_replace",
+    "ft_inter", "ft_union", "ft_wdmatch", "ft_hidenp", "ft_epur_str", "alpha_mirror",
   ],
   extreme_math: [
     "ft_find_next_prime", "ft_is_prime", "ft_recursive_power", "ft_recursive_factorial",
     "ft_sqrt", "ft_fibonacci", "ft_atoi", "ft_putnbr", "ft_print_comb",
+    "ft_ten_queens_count", "ft_gcd", "ft_lcm", "ft_itoa", "ft_print_comb2",
+    "ft_reverse_bits", "ft_swap_bits",
+  ],
+  extreme_final: [
+    "ft_ten_queens_count", "ft_strjoin", "ft_itoa", "ft_range", "ft_rrange",
+    "ft_map", "ft_any", "ft_count_if", "ft_is_anagram", "ft_inter", "ft_union",
+    "ft_find_next_prime", "ft_strcapitalize", "ft_print_comb2", "ft_atoi",
   ],
 };
 
@@ -1616,57 +1679,57 @@ const EXAMS = {
     "exam01",
     "Exam 01",
     [
-      "pointers_intro", "pointers_intro", "strings_copy", "strings_check", "strings_case",
-      /* L5+ — harder strings / putnbr */
-      "e01_putnbr", "strings_case", "e01_putnbr", "strings_check", "e01_putnbr",
+      "pointers_intro", "ctype_basics", "strings_copy", "strings_check", "strings_case",
+      /* L5+ — harder strings / putnbr / exam strings */
+      "e01_putnbr", "strings_exam", "e01_putnbr", "strings_case", "strings_exam",
     ],
     [
-      "pointers_intro", "strings_copy", "strings_case", "strings_check", "e01_putnbr",
+      "pointers_intro", "strings_copy", "strings_case", "strings_exam", "e01_putnbr",
       /* L5+ — very hard */
-      "extreme_strings", "e01_putnbr", "extreme_strings", "e01_putnbr", "extreme_strings",
+      "extreme_strings", "strings_exam", "extreme_strings", "e01_putnbr", "extreme_strings",
     ],
     [
-      "strings_copy", "extreme_strings", "strings_case", "extreme_strings", "e01_putnbr",
+      "strings_copy", "extreme_strings", "strings_exam", "extreme_strings", "e01_putnbr",
       /* L5+ — very extreme */
-      "extreme_strings", "extreme_strings", "extreme_strings", "extreme_strings", "extreme_strings",
+      "extreme_strings", "extreme_strings", "strings_exam", "extreme_strings", "extreme_strings",
     ]
   ),
   exam02: buildExam(
     "exam02",
     "Exam 02",
     [
-      "atoi_putnbr", "strings_copy", "recursion_easy", "math_mid", "primes_hard",
-      /* L5+ — harder math / primes */
-      "primes_hard", "math_mid", "primes_hard", "final_mix_hard", "primes_hard",
+      "atoi_putnbr", "strings_exam", "recursion_easy", "math_mid", "bits_exam",
+      /* L5+ — harder math / primes / malloc */
+      "primes_hard", "malloc_exam", "primes_hard", "final_mix_hard", "bits_exam",
     ],
     [
-      "atoi_putnbr", "recursion_easy", "math_mid", "primes_hard", "atoi_putnbr",
+      "atoi_putnbr", "recursion_easy", "math_mid", "bits_exam", "malloc_exam",
       /* L5+ — very hard */
-      "final_mix_hard", "primes_hard", "final_mix_hard", "extreme_math", "final_mix_hard",
+      "final_mix_hard", "primes_hard", "extreme_math", "malloc_exam", "final_mix_hard",
     ],
     [
-      "atoi_putnbr", "extreme_math", "math_mid", "extreme_math", "primes_hard",
+      "atoi_putnbr", "extreme_math", "bits_exam", "extreme_math", "malloc_exam",
       /* L5+ — very extreme */
-      "extreme_math", "extreme_math", "extreme_math", "extreme_math", "extreme_math",
+      "extreme_math", "extreme_final", "extreme_math", "extreme_final", "extreme_math",
     ]
   ),
   final: buildExam(
     "final",
     "Exam Final",
     [
-      "final_mix_easy", "final_mix_easy", "strings_copy", "pointers_intro", "atoi_putnbr",
+      "final_mix_easy", "ctype_basics", "strings_copy", "pointers_intro", "atoi_putnbr",
       /* L5+ — harder mix */
-      "primes_hard", "final_mix_hard", "primes_hard", "final_mix_hard", "primes_hard",
+      "primes_hard", "final_mix_hard", "malloc_exam", "bits_exam", "mem_libft",
     ],
     [
-      "final_mix_hard", "strings_copy", "atoi_putnbr", "recursion_easy", "math_mid",
+      "final_mix_hard", "strings_exam", "atoi_putnbr", "recursion_easy", "malloc_exam",
       /* L5+ — very hard */
-      "final_mix_hard", "primes_hard", "final_mix_hard", "extreme_math", "final_mix_hard",
+      "final_mix_hard", "primes_hard", "extreme_final", "extreme_math", "mem_libft",
     ],
     [
-      "extreme_math", "extreme_strings", "final_mix_hard", "extreme_math", "extreme_math",
+      "extreme_math", "extreme_strings", "extreme_final", "malloc_exam", "bits_exam",
       /* L5+ — very extreme */
-      "extreme_math", "extreme_math", "extreme_strings", "extreme_math", "extreme_math",
+      "extreme_final", "extreme_math", "extreme_strings", "extreme_final", "extreme_math",
     ]
   ),
 };
@@ -1686,6 +1749,7 @@ function normalizeDifficulty(d) {
 }
 
 function listExams() {
+  const bankSize = Object.keys(BANK).length;
   return Object.values(EXAMS).map((e) => ({
     id: e.id,
     title: e.title,
@@ -1693,7 +1757,8 @@ function listExams() {
     exercisesPerLevel: EXERCISES_ASSIGNED_PER_LEVEL,
     durationMs: getExamDurationMs(e.id),
     durationHours: getExamDurationMs(e.id) / (60 * 60 * 1000),
-    poolHint: "multi-exercise pool · 2 random assigned · L5+ harder",
+    bankSize,
+    poolHint: `${bankSize} subjects · 2 random / level · L5+ harder by difficulty`,
     difficulties: Object.values(DIFFICULTIES),
   }));
 }

@@ -72,6 +72,8 @@ Prefer **Step** before **Run** in meetings so students predict memory and output
 5. `grade` / `grademe` or **Ctrl+Enter**
 6. Clear both assignments in a level to unlock the next
 
+**~116 graded subjects** across display, pointers, strings, math, bits, malloc, and exam classics. Each level picks **2 random** exercises from a themed pool; from level 5+, harder pools are preferred based on **normal / hard / extreme**.
+
 ### Terminal
 
 | Feature | Notes |

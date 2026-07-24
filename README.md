@@ -112,7 +112,7 @@ A separate page that mimics **42 examshell** for local practice.
 3. Pick exam + difficulty → timer starts (**4h** for exam00–02, **8h** for final)
 4. Workspace opens: **rendu** editor (left) + **subject** (right) + terminal (bottom)
 5. Type your solution by hand → `grade` / `grademe` (or Ctrl+Enter)
-6. Clear levels to unlock the next (multi-exercise pools per level)
+6. Clear levels to unlock the next (**~116** subjects · 2 random per level · harder from L5+ by difficulty)
 
 **Terminal**
 

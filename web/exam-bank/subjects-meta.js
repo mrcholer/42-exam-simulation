@@ -259,8 +259,13 @@ const META = {
 
 function applySubjects(bank) {
   const { parseAllowedList } = require("./cheat-check");
+  let EXTRA_META = {};
+  try {
+    EXTRA_META = require("./bank-extra").EXTRA_META || {};
+  } catch (_) { /* optional */ }
+  const allMeta = { ...EXTRA_META, ...META };
   for (const [id, exercise] of Object.entries(bank)) {
-    const meta = META[id];
+    const meta = allMeta[id];
     if (!meta) continue;
     exercise.subject = renderSubject({
       name: exercise.name || id,

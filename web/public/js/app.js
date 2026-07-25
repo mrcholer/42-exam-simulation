@@ -13,8 +13,10 @@
   let curriculum = { tree: [], stats: {} };
   let allCFiles = [];
   let allQuizzes = [];
+  let scratchFiles = [];
   let activeModuleFilter = "all";
   let sidebarView = "browse";
+  let suppressUrlUpdates = false;
 
   /** @type {Map<string, Tab>} */
   const tabs = new Map();
@@ -88,25 +90,28 @@ int	main(void)
 `;
 
   initMonaco().then(async () => {
-        if (typeof marked !== "undefined") {
-          try {
-            marked.use({ gfm: true, breaks: true });
-          } catch (e) {
-            console.warn("marked.use failed:", e);
-          }
-        }
+    if (typeof marked !== "undefined") {
+      try {
+        marked.use({ gfm: true, breaks: true });
+      } catch (e) {
+        console.warn("marked.use failed:", e);
+      }
+    }
     applyPersistedSettings();
     bindEvents();
     initResize();
     initWorkspaceSplitResize();
-    openTabFromContent("demo/welcome.c", DEFAULT_CODE, {
-      ext: "c",
-      module: "Demo",
-      lines: DEFAULT_CODE.split("\n").length,
-      bytes: DEFAULT_CODE.length,
-      exercise: "welcome",
-    }, true);
     await Promise.all([loadCurriculum(), loadCFiles(), loadQuizzes()]);
+    await applyUrlStateFromLocation();
+    if (!getActiveTab()) {
+      openTabFromContent("demo/welcome.c", DEFAULT_CODE, {
+        ext: "c",
+        module: "Demo",
+        lines: DEFAULT_CODE.split("\n").length,
+        bytes: DEFAULT_CODE.length,
+        exercise: "welcome",
+      }, true);
+    }
     refreshStats();
     refreshProgressUi();
   });
@@ -183,6 +188,109 @@ int	main(void)
     if (type === "c" || type === "h") return "c";
     if (type === "md" || type === "lesson" || type === "quiz-md" || type === "cheatsheet") return "markdown";
     return "plaintext";
+  }
+
+  function buildUrlState(tab, view) {
+    const params = new URLSearchParams();
+    if (tab?.scratchId) {
+      params.set("folder", "scratch");
+      params.set("file", tab.name || "");
+      params.set("tab", tab.name || "");
+    } else if (tab?.path) {
+      const path = tab.path.replace(/\\/g, "/");
+      const parts = path.split("/");
+      if (parts.length > 1) {
+        params.set("folder", parts[0]);
+        params.set("file", parts.slice(1).join("/"));
+      } else {
+        params.set("file", parts[0]);
+      }
+      params.set("tab", tab.name || path);
+    }
+    if (tab && ["md", "lesson", "quiz-md", "cheatsheet"].includes(tab.type) && tab.mdMode) {
+      params.set("mode", tab.mdMode);
+    }
+    if (view && view !== "browse") params.set("sidebar", view);
+    return params.toString();
+  }
+
+  function updateUrlState(tab, view, replace = false) {
+    if (suppressUrlUpdates) return;
+    const url = new URL(window.location.href);
+    url.search = buildUrlState(tab, view);
+    url.hash = window.location.hash || "";
+    if (replace) {
+      window.history.replaceState({}, "", url);
+    } else {
+      window.history.pushState({}, "", url);
+    }
+  }
+
+  function setSidebarView(view) {
+    sidebarView = view;
+    $$(".sidebar-tab").forEach((t) => t.classList.toggle("active", t.dataset.view === view));
+    $$(".sidebar-view").forEach((v) => v.classList.toggle("active", v.id === `view-${view}`));
+    if (view === "scratch") {
+      els.filterChips.classList.add("hidden");
+      const active = getActiveTab();
+      loadScratchList(active?.scratchId, els.search.value);
+      if (active?.scratchId) loadScratchHistory(active.scratchId);
+    } else {
+      els.filterChips.classList.remove("hidden");
+      if (view === "cfiles") renderCFilesList(allCFiles, els.search.value);
+      else if (view === "quizzes") renderQuizzesList(allQuizzes, els.search.value);
+      else renderTree(curriculum.tree || [], els.search.value);
+    }
+  }
+
+  async function applyUrlStateFromLocation(isPopstate = false) {
+    const params = new URLSearchParams(window.location.search);
+    const folder = params.get("folder");
+    const file = params.get("file");
+    const tab = params.get("tab");
+    const sidebar = params.get("sidebar");
+    const mode = params.get("mode");
+
+    if (sidebar) setSidebarView(sidebar);
+
+    if (!file) {
+      if (!isPopstate) updateUrlState(getActiveTab(), sidebarView, true);
+      return;
+    }
+
+    if (folder === "scratch" || !folder) {
+      await loadScratchList(null);
+      let scratchId = scratchFiles.find((f) => f.name === file || f.name === tab)?.id;
+      if (!scratchId && file) {
+        const created = await fetch("/api/scratch", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: file }),
+        }).then((res) => res.json()).catch(() => null);
+        if (created?.id) {
+          scratchId = created.id;
+          scratchFiles.push(created);
+        }
+      }
+      if (scratchId) {
+        suppressUrlUpdates = true;
+        await openScratch(scratchId);
+        suppressUrlUpdates = false;
+        updateUrlState(getActiveTab(), sidebarView, true);
+      }
+      return;
+    }
+
+    const path = `${folder}/${file}`;
+    suppressUrlUpdates = true;
+    await openFile(path);
+    const activeTab = getActiveTab();
+    if (activeTab && ["md", "lesson", "quiz-md", "cheatsheet"].includes(activeTab.type) && mode) {
+      setMdMode(mode);
+    }
+    suppressUrlUpdates = false;
+    updateUrlState(getActiveTab(), sidebarView, true);
+    jumpToHashForTab(getActiveTab(), true);
   }
 
   function getActiveTab() {
@@ -273,6 +381,7 @@ int	main(void)
       loadScratchHistory(tab.scratchId);
     }
 
+    updateUrlState(tab, sidebarView);
     relayoutEditor();
     setTimeout(relayoutEditor, 120);
   }
@@ -317,6 +426,7 @@ int	main(void)
         renderTabBar();
         els.mdModeBtns.classList.add("hidden");
         els.companionBtns.classList.add("hidden");
+        updateUrlState(null, sidebarView, true);
       }
     } else {
       renderTabBar();
@@ -384,7 +494,7 @@ int	main(void)
       } else {
         editor.layout();
       }
-      
+
       // Second pass for safety
       requestAnimationFrame(() => {
         const r2 = els.editorHost.parentElement.getBoundingClientRect();
@@ -454,9 +564,86 @@ int	main(void)
       } else {
         els.mdPreview.textContent = body;
       }
+      attachHeadingAnchors(tab);
+      jumpToHashForTab(tab);
     };
     if (immediate) run();
     else previewTimer = setTimeout(run, 180);
+  }
+
+  function attachHeadingAnchors(tab) {
+    const preview = els.mdPreview;
+    if (!preview) return;
+    const headings = preview.querySelectorAll("h1, h2, h3, h4, h5, h6");
+    headings.forEach((heading) => {
+      const text = heading.textContent || "";
+      const id = heading.id || generateHeadingId(text);
+      heading.id = id;
+      heading.style.cursor = "pointer";
+      heading.addEventListener("click", (event) => {
+        event.preventDefault();
+        const hash = `#${encodeURIComponent(id)}`;
+        if (window.location.hash !== hash) {
+          window.location.hash = hash;
+        }
+        updateUrlState(getActiveTab(), sidebarView, true);
+      });
+    });
+  }
+
+  function generateHeadingId(text) {
+    return text
+      .trim()
+      .toLowerCase()
+      .replace(/[\u00A0\s]+/g, "-")
+      .replace(/[^a-z0-9\-\s]/g, "")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
+  }
+
+  function jumpToHashForTab(tab, useHash = false) {
+    if (!tab || !window.location.hash) return;
+    const hash = window.location.hash.slice(1);
+    if (!hash) return;
+    const targetId = decodeURIComponent(hash);
+    const preview = els.mdPreview;
+    const editorModel = tab.model;
+
+    if (tab.mdMode === "preview" || tab.mdMode === "quiz") {
+      const target = preview.querySelector(`#${CSS.escape(targetId)}`);
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+
+    if (tab.mdMode === "edit" || tab.mdMode === "split") {
+      const line = findLineForHash(editorModel, targetId);
+      if (typeof line === "number") {
+        editor.revealLineInCenter(line);
+      }
+    }
+
+    if (useHash && window.location.hash && !tab.mdMode) {
+      const target = document.getElementById(targetId);
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+  }
+
+  function findLineForHash(model, hash) {
+    if (!model) return null;
+    const lines = model.getLinesContent();
+    const normalized = hash.toLowerCase();
+    for (let i = 0; i < lines.length; i += 1) {
+      const text = lines[i].trim();
+      const match = text.match(/^#+\s*(.+)$/);
+      if (match) {
+        const id = match[1].trim().toLowerCase().replace(/\s+/g, "-").replace(/[^ -]/g, "");
+        if (id === normalized) return i + 1;
+      }
+    }
+    return null;
   }
 
   function renderQuizInTab(tab) {
@@ -620,20 +807,26 @@ int	main(void)
 
   /* ── Scratch files (temp C files with save history) ── */
 
-  async function loadScratchList(activeId) {
+  async function loadScratchList(activeId, filter = "") {
     try {
       const res = await fetch("/api/scratch");
       const data = await res.json();
-      renderScratchList(data.files || [], activeId);
+      scratchFiles = data.files || [];
+      renderScratchList(scratchFiles, activeId, filter);
     } catch (_) {
       els.scratchList.innerHTML = `<p class="empty-state">Could not load scratch files.</p>`;
     }
   }
 
-  function renderScratchList(files, activeId) {
+  function renderScratchList(files, activeId, filter = "") {
+    const q = filter.toLowerCase();
+    let filtered = files;
+    if (q) {
+      filtered = filtered.filter((f) => f.name.toLowerCase().includes(q) || (f.path || "").toLowerCase().includes(q));
+    }
     els.scratchList.innerHTML = "";
-    if (!files.length) {
-      els.scratchList.innerHTML = `<p class="empty-state">No scratch files yet. Hit <kbd>+ New C scratch</kbd> to create a temp C file that saves to the server with full history.</p>`;
+    if (!filtered.length) {
+      els.scratchList.innerHTML = `<p class="empty-state">No scratch files match.</p>`;
       return;
     }
     for (const f of files) {
@@ -835,7 +1028,7 @@ int	main(void)
       if (tabs.has(tabId)) closeTab(tabId);
       els.scratchHistory.innerHTML = "";
       loadScratchList();
-    } catch (_) {}
+    } catch (_) { }
   }
 
   function formatTime(iso) {
@@ -1016,6 +1209,8 @@ int	main(void)
   /* ── Events ── */
 
   function bindEvents() {
+    window.addEventListener("popstate", () => applyUrlStateFromLocation(true));
+    window.addEventListener("hashchange", () => jumpToHashForTab(getActiveTab()));
     $("#btn-run").addEventListener("click", runCode);
     $("#btn-step").addEventListener("click", startStepMode);
     $("#btn-auto").addEventListener("click", toggleAutoStep);
@@ -1043,14 +1238,8 @@ int	main(void)
 
     $$(".sidebar-tab").forEach((tab) => {
       tab.addEventListener("click", () => {
-        sidebarView = tab.dataset.view;
-        $$(".sidebar-tab").forEach((t) => t.classList.toggle("active", t === tab));
-        $$(".sidebar-view").forEach((v) => v.classList.toggle("active", v.id === `view-${sidebarView}`));
-        if (sidebarView === "scratch") {
-          const active = getActiveTab();
-          loadScratchList(active?.scratchId);
-          if (active?.scratchId) loadScratchHistory(active.scratchId);
-        }
+        setSidebarView(tab.dataset.view);
+        updateUrlState(getActiveTab(), sidebarView);
       });
     });
 
@@ -1078,9 +1267,15 @@ int	main(void)
 
     els.search.addEventListener("input", (e) => {
       const q = e.target.value;
-      renderTree(curriculum.tree || [], q);
-      renderCFilesList(allCFiles, q);
-      renderQuizzesList(allQuizzes, q);
+      if (sidebarView === "scratch") {
+        renderScratchList(scratchFiles, getActiveTab()?.scratchId, q);
+      } else if (sidebarView === "quizzes") {
+        renderQuizzesList(allQuizzes, q);
+      } else if (sidebarView === "cfiles") {
+        renderCFilesList(allCFiles, q);
+      } else {
+        renderTree(curriculum.tree || [], q);
+      }
     });
 
     document.addEventListener("keydown", (e) => {
@@ -1110,8 +1305,14 @@ int	main(void)
   function setSidebar(open) {
     const root = $("#app-root");
     const overlay = $("#sidebar-overlay");
+    const isMobile = window.matchMedia("(max-width: 900px)").matches;
     root?.classList.toggle("sidebar-open", open);
-    overlay?.classList.toggle("show", open);
+    root?.classList.toggle("sidebar-closed", !open);
+    if (isMobile) {
+      overlay?.classList.toggle("show", open);
+    } else {
+      overlay?.classList.remove("show");
+    }
   }
   function toggleSidebar() {
     setSidebar(!$("#app-root")?.classList.contains("sidebar-open"));

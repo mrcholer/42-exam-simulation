@@ -34,13 +34,10 @@
   const HIST_KEY_LEGACY = "poolers.examHist";
   const HIST_STORE_KEY = "poolers.termHist";
   const HIST_MAX = 200;
-  /** Shared persisted histories — all terminals of a kind share one list (zsh-like). */
   let histStore = { examshell: [], test: [] };
 
-  /* ── VS Code–like terminal tabs / split (layout) ── */
   const terminals = new Map();
   let activeTermId = null;
-  /** Fixed left/right pair while split — focus does not swap panes. */
   let splitPair = null;
   let termSeq = 1;
   let shellTermId = null;
@@ -145,10 +142,8 @@
       }
     });
 
-    // Click anywhere in this terminal card → focus input (VS Code–like)
     panel.addEventListener("pointerdown", (e) => {
       if (e.target.closest("button, a, .term-tab-close, .term-icon-btn, .term-split-sash")) return;
-      // Let the real input take focus naturally
       if (e.target.closest(".term-in")) {
         activeTermId = id;
         markFocused(id);
@@ -156,7 +151,6 @@
         promptLabel();
         return;
       }
-      // Prevent output/form chrome from stealing focus away from the input
       e.preventDefault();
       focusTerminal(id);
     });

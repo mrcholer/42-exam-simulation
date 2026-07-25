@@ -1585,9 +1585,21 @@ int	main(void)
       setTerminal("Step mode works on C code tabs.", true);
       return;
     }
+
+    const code = getEditorCode();
+    const lineCount = code.split("\n").length;
+    const charCount = code.length;
+    const MAX_STEP_LINES = 320;
+    const MAX_STEP_CHARS = 24000;
+
+    if (lineCount > MAX_STEP_LINES || charCount > MAX_STEP_CHARS) {
+      setTerminal(`Code too large for Step mode. Reduce the file to ${MAX_STEP_LINES} lines or ${MAX_STEP_CHARS} characters.`, true);
+      return;
+    }
+
     if (els.stepsModeHint) els.stepsModeHint.textContent = "· sim";
     setBottomTab("steps");
-    traceSteps = PoolersTracer.buildSteps(getEditorCode());
+    traceSteps = PoolersTracer.buildSteps(code);
     stepIndex = 0;
     els.stepCounter.className = "pill";
     $("#btn-next").disabled = traceSteps.length <= 1;
